@@ -1,8 +1,16 @@
 # instagram-scrapper
 
-Currently instagram scrapper will scrape only the home page of yours with max 24 images and download them locally. Without using API it will ask you for login credentials and after all authentication it will save cookies locally with ./.cookies.txt and then it will scrape images and download them sequentially.
+Instagram scrapper provides you whole new experience of scrapping through python programming language.
 
-To-do list:
+###Features
 
-1. Give options to download all images from any particular profile
-2. Gets loads of images from any particular hash-tag (may require extra knowledge of scraping related javascript and networking.)
+1. You can log in to instagram site.
+2. It can save cookies so that you don't have log in everytime you run this program.
+3. You can scrape all images from any profile as long as it is not private.
+4. You can scrape all images from your home and see latest images in an instant.
+5. Images can be download in both Normal and in Original mode.
+
+
+###To-do list:
+
+1. Gets loads of images from any particular hash-tag (may require extra knowledge of scraping related javascript and networking.)
