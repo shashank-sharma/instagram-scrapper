@@ -38,6 +38,122 @@ except:
 time.sleep(1)
 
 
+def tags_scrape():
+    # To scrape given tag and download all images from it
+
+    start = 0
+    name = 0
+    print 'Enter the tag name you wish to download',
+    tag = raw_input()
+    print bcolors.WARNING+'Getting data related tag'+bcolors.ENDC
+    try:
+        br.open('https://www.instagram.com/explore/tags/'+tag)
+        soup = BeautifulSoup(br.response().read())
+        print bcolors.OKGREEN+'Data: OK'.bcolors.ENDC
+    except:
+        zz = 0
+        while True:
+            try:
+                br.open('https://www.instagram.com/explore/tags/'+tag)
+                soup = BeautifulSoup(br.response().read())
+                print bcolors.OKGREEN+'Data: OK'+bcolors.ENDC
+                break
+            except:
+                zz+=1
+
+    # To get particular script so that we can get all image/media link.
+    # Currently it supports image download not videos
+    try:
+        ss = 0
+        l = soup.find_all('script')
+        for i in l:
+            if i.text[:18] == 'window._sharedData':
+                break
+            else:
+                ss+=1
+        l= soup.find_all('script')[ss].text
+    except:
+        print soup.find_all('script')
+
+    jsonValue = '{%s}' % (l.split('{', 1)[1].rsplit('}', 1)[0],)
+    value = json.loads(jsonValue)
+    print 'Want to download [H]D images or [N]ormal'
+    choice = raw_input()
+    if choice == 'n' or choice == 'N':
+        quality = 'thumbnail_src'
+    else:
+        quality = 'display_src'
+    print bcolors.BOLD+bcolors.WARNING+'\n\n[INSTAGRAM]: Getting data '+bcolors.ENDC
+
+    load = 0
+    while True:
+        # Get data and represent it in list
+        data = value['entry_data']['TagPage'][0]['tag']['media']['nodes']
+        count = len(data)
+        print bcolors.WARNING+str(count)+' images'+bcolors.ENDC
+        page = value['entry_data']['TagPage'][0]['tag']['media']['page_info']['has_next_page']
+        for i in xrange(len(data)):
+            sys.stdout.write('\r')
+            sys.stdout.write("[%-50s] %.2f%%" % ('='*(int(load)/2), load))
+            sys.stdout.flush()
+            link = str(data[i][quality])
+            try:
+                # This is where images get downloaded
+                urlretrieve(link, str(name+1)+'.jpg')
+            except:
+                if '.jpg' not in link:
+                    print 'Not a jpg file - Testing'    # Testing case to test if there comes any error or not
+                    break
+                else:
+                    z = 1
+                    if z%3==0:
+                        print 'Trying again after '+str(60*(z/3))+' seconds'   # Need to remove this but it is for testing
+                        time.sleep(60*(z/3))
+                    while True:
+                        try:
+                            urlretrieve(link, user_id+str(i+1)+'.jpg')
+                            break
+                        except:
+                            z+=1
+            start+=1
+            name+=1
+            load = ((start+1)/float(count))*100
+        if not page:
+            print bcolors.OKGREEN+'\n\nStatus: Completed'+bcolors.ENDC
+            break
+        else:
+            print '\n'
+            start = 0
+            load = 0
+            ss = 0
+            next = str(value['entry_data']['TagPage'][0]['tag']['media']['page_info']['end_cursor'])
+            br.open('https://www.instagram.com/explore/tags/'+tag+'/?max_id='+next)
+            try:
+                soup = BeautifulSoup(br.response().read())
+            except:
+                x = 0
+                while True:
+                    try:
+                        soup = BeautifulSoup(br.response().read())
+                        break                    
+                    except:
+                        if x == 3:
+                            break
+                        x+=1
+            try:
+                l = soup.find_all('script')
+                for i in l:
+                    if i.text[:18] == 'window._sharedData':
+                        break
+                    else:
+                        ss+=1
+                l= soup.find_all('script')[ss].text
+                jsonValue = '{%s}' % (l.split('{', 1)[1].rsplit('}', 1)[0],)
+                value = json.loads(jsonValue)
+            except:
+                print soup.find_all('script') # To analyze the error as if why it is breaking
+
+
 
 def profile_scrape():
     # Use to scrape given profile user and get all images from it
@@ -105,7 +221,7 @@ def profile_scrape():
         page = value['entry_data']['ProfilePage'][0]['user']['media']['page_info']['has_next_page']
         for i in xrange(len(data)):
             sys.stdout.write('\r')
-            sys.stdout.write("[%-50s] %d%%" % ('='*(int(load)/2), load))
+            sys.stdout.write("[%-50s] %.2f%%" % ('='*(int(load)/2), load))
             sys.stdout.flush()
             link = str(data[i][quality])
             try:
@@ -334,10 +450,11 @@ else:
     if flag == 0:
         print bcolors.OKGREEN+bcolors.BOLD+'Log in: Accepted'+bcolors.ENDC
     time.sleep(2)
-    print bcolors.WARNING+'Welcome to Instagram scraper\nCurrently you can scrape:\n1. Home page of your instagram\n2. Any particular profile (all images)'+bcolors.ENDC
+    print bcolors.WARNING+'Welcome to Instagram scraper\nCurrently you can scrape:\n1. Home page of your instagram\n2. Any particular profile (all images)'+bcolors.ENDC,
+    print bcolors.WARNING+'\n3. Download images from tags'
     while True:
         time.sleep(1)
-        print('Type your choice [1] or [2]')
+        print('Type your choice [1], [2] or [3]')
         check = raw_input()
         if check == '2':
             profile_scrape()
@@ -345,5 +462,7 @@ else:
             insta_scrape()
         elif check == '0':
             exit()
+        elif check == '3':
+            tags_scrape()
         else:
             print 'Type [0] to quit'
