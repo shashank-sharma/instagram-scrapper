@@ -1,3 +1,4 @@
+<img src="https://i.stack.imgur.com/oXvDL.png" align="right" height="50%" width="50%">
 # instagram-scrapper
 
 Instagram scrapper provides you whole new experience of scrapping through python programming language.
