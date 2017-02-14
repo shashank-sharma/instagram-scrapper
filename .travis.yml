@@ -4,5 +4,6 @@ python:
 cache: pip
 install:
   - pip install -r requirements.txt
+before_script: cd
 script:
   - python instagram.py < testing.txt
